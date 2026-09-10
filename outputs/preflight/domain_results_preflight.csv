@@ -1,0 +1,41 @@
+domain_number,domain,definition,agreements,observations,crude_agreement_percent
+1,Eligibility,Total,13,24,54.166667
+1,Eligibility,Range,17,24,70.833333
+1,Eligibility,Censored,12,22,54.545455
+1,Eligibility,Bucketed,15,24,62.5
+2,Recruitment,Total,13,24,54.166667
+2,Recruitment,Range,18,24,75.0
+2,Recruitment,Censored,10,17,58.823529
+2,Recruitment,Bucketed,17,24,70.833333
+3,Setting,Total,13,24,54.166667
+3,Setting,Range,19,24,79.166667
+3,Setting,Censored,13,24,54.166667
+3,Setting,Bucketed,17,24,70.833333
+4,Organization,Total,10,24,41.666667
+4,Organization,Range,17,24,70.833333
+4,Organization,Censored,10,24,41.666667
+4,Organization,Bucketed,16,24,66.666667
+5,Flexibility in Delivery,Total,16,24,66.666667
+5,Flexibility in Delivery,Range,20,24,83.333333
+5,Flexibility in Delivery,Censored,16,24,66.666667
+5,Flexibility in Delivery,Bucketed,20,24,83.333333
+6,Flexibility in Adherence,Total,10,24,41.666667
+6,Flexibility in Adherence,Range,11,24,45.833333
+6,Flexibility in Adherence,Censored,10,15,66.666667
+6,Flexibility in Adherence,Bucketed,11,24,45.833333
+7,Follow-up,Total,12,23,52.173913
+7,Follow-up,Range,17,23,73.913043
+7,Follow-up,Censored,12,22,54.545455
+7,Follow-up,Bucketed,14,23,60.869565
+8,Primary Outcome,Total,10,23,43.478261
+8,Primary Outcome,Range,15,23,65.217391
+8,Primary Outcome,Censored,10,23,43.478261
+8,Primary Outcome,Bucketed,13,23,56.521739
+9,Primary Analysis,Total,7,23,30.434783
+9,Primary Analysis,Range,10,23,43.478261
+9,Primary Analysis,Censored,6,16,37.5
+9,Primary Analysis,Bucketed,8,23,34.782609
+10,Comparator,Total,11,24,45.833333
+10,Comparator,Range,21,24,87.5
+10,Comparator,Censored,11,24,45.833333
+10,Comparator,Bucketed,21,24,87.5

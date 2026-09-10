@@ -1,0 +1,5 @@
+definition,agreements,observations,crude_agreement_percent,independently_calculated_alpha_point_estimate
+Total,115,237,48.523207,0.300067
+Range,165,237,69.620253,0.334524
+Censored,110,211,52.132701,0.338611
+Bucketed,152,237,64.135021,0.269673

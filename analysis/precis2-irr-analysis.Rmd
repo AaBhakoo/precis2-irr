@@ -1,0 +1,1018 @@
+---
+title: "PRECIS-2 Inter-Rater Reliability Analysis"
+author: "Aarian Bhakoo"
+date: "`r format(Sys.Date(), '%Y-%m-%d')`"
+output:
+  pdf_document:
+    toc: yes
+    number_sections: yes
+---
+
+```{r setup, include=FALSE}
+# Global chunk options
+knitr::opts_chunk$set(
+  echo = FALSE,
+  warning = FALSE,
+  message = FALSE,
+  error = FALSE,
+  fig.align = "center"
+)
+
+# Required packages
+library(dplyr)
+library(tidyr)
+library(purrr)
+library(tibble)
+library(knitr)
+library(krippendorffsalpha)
+
+# Display numerical results consistently
+options(
+  digits = 4,
+  scipen = 999
+)
+
+set.seed(2026)
+```
+
+This report reproduces the prespecified inter-rater reliability analyses for
+the finalized set of 237 paired PRECIS-2 ratings. Codes 1--5 represent the
+ordinal pragmatism scale; code 6 represents Missing and code 7 represents Not
+Applicable. The archived statistician-reviewed implementation is retained
+unchanged, and its Krippendorff's alpha machinery is preserved below.
+
+
+# Setup
+# Defining Agreement
+```{r}
+# Permitted rating codes:
+#   1-5 = ordinal PRECIS-style scores
+#   6   = Missing
+#   7   = Non-Applicable
+
+VALID_CODES <- 1:7
+ORDINAL_CODES <- 1:5
+MISSING_CODE <- 6
+NON_APPLICABLE_CODE <- 7
+SPECIAL_CODES <- c(MISSING_CODE, NON_APPLICABLE_CODE)
+
+# Maximum ordinal disagreement is defined using scores 1 and 5.
+MAX_ORDINAL_DIFFERENCE <- 5 - 1
+MAX_DISAGREEMENT <- 1
+```
+
+# Loading Files
+```{r}
+# Locate the repository whether the report is rendered from the project root
+# or directly from the analysis directory in RStudio.
+project_root <- if (dir.exists(file.path("data", "derived"))) {
+  normalizePath(".", mustWork = TRUE)
+} else if (dir.exists(file.path("..", "data", "derived"))) {
+  normalizePath("..", mustWork = TRUE)
+} else {
+  stop("Could not locate the repository's data/derived directory.")
+}
+
+repo_path <- function(...) file.path(project_root, ...)
+
+# Read the finalized, domain-major analysis tables from the repository.
+ratings_file <- repo_path(
+  "data", "derived", "independent_ratings_tidy.csv"
+)
+consensus_file <- repo_path(
+  "data", "derived", "consensus_ratings_tidy.csv"
+)
+
+ratings_tidy <- read.csv(
+  ratings_file,
+  check.names = FALSE,
+  stringsAsFactors = FALSE
+) |>
+  arrange(observation_id)
+
+consensus_tidy <- read.csv(
+  consensus_file,
+  check.names = FALSE,
+  stringsAsFactors = FALSE,
+  na.strings = c("", "NA")
+) |>
+  arrange(observation_id)
+
+rater_names <- c("Aarian", "Merrick")
+censored_rater_names <- rater_names
+
+# The approved alpha code uses both matrix orientations. These objects retain
+# the same names and orientations as in the statistician-reviewed script.
+ratings_units_by_raters <- ratings_tidy |>
+  select(observer_1, observer_2) |>
+  mutate(across(everything(), as.numeric)) |>
+  as.matrix()
+
+colnames(ratings_units_by_raters) <- rater_names
+rownames(ratings_units_by_raters) <- ratings_tidy$observation_id
+ratings_matrix <- t(ratings_units_by_raters)
+
+censored_units_by_raters <- ratings_units_by_raters
+censored_units_by_raters[
+  censored_units_by_raters %in% SPECIAL_CODES
+] <- NA_real_
+censored_matrix <- t(censored_units_by_raters)
+```
+
+
+# Validation
+```{r}
+# Confirm that the main dataset contains only valid codes or genuine NA values.
+required_rating_columns <- c(
+  "observation_id", "trial_order", "trial", "domain_number", "domain",
+  "observer_1", "observer_2"
+)
+required_consensus_columns <- c(
+  "observation_id", "trial", "domain_number", "domain",
+  "consensus"
+)
+
+if (!all(required_rating_columns %in% names(ratings_tidy))) {
+  stop("The finalized ratings table is missing one or more required columns.")
+}
+
+if (!all(required_consensus_columns %in% names(consensus_tidy))) {
+  stop("The finalized consensus table is missing one or more required columns.")
+}
+
+if (nrow(ratings_tidy) != 237L || nrow(consensus_tidy) != 237L) {
+  stop("Both finalized tables must contain exactly 237 observations.")
+}
+
+if (anyDuplicated(ratings_tidy$observation_id) ||
+    anyDuplicated(consensus_tidy$observation_id)) {
+  stop("Observation identifiers must be unique within each finalized table.")
+}
+
+if (!identical(ratings_tidy$observation_id, consensus_tidy$observation_id)) {
+  stop("Ratings and consensus observations are not aligned.")
+}
+
+if (!identical(ratings_tidy$trial, consensus_tidy$trial) ||
+    !identical(ratings_tidy$domain_number, consensus_tidy$domain_number)) {
+  stop("Trial or domain labels differ between ratings and consensus tables.")
+}
+
+if (!identical(sort(unique(ratings_tidy$domain_number)), 1:10)) {
+  stop("The analysis must contain the ten final PRECIS-2 domains.")
+}
+
+if (length(unique(ratings_tidy$trial)) != 24L) {
+  stop("The finalized analysis must contain 24 trials.")
+}
+
+excluded_rows_present <- ratings_tidy |>
+  filter(trial == "Thompson (2000B)", domain_number %in% 7:9)
+
+if (nrow(excluded_rows_present) > 0L) {
+  stop("Excluded Thompson (2000B) Domains 7-9 are present in the analysis.")
+}
+
+observed_codes <- sort(unique(as.vector(ratings_matrix)))
+observed_codes <- observed_codes[!is.na(observed_codes)]
+
+invalid_codes <- setdiff(observed_codes, VALID_CODES)
+
+if (length(invalid_codes) > 0) {
+  stop(
+    "The main ratings file contains invalid codes: ",
+    paste(invalid_codes, collapse = ", ")
+  )
+}
+
+# Confirm that the censored dataset contains only scores 1-5 or NA.
+observed_censored_codes <- sort(unique(as.vector(censored_matrix)))
+observed_censored_codes <-
+  observed_censored_codes[!is.na(observed_censored_codes)]
+
+invalid_censored_codes <-
+  setdiff(observed_censored_codes, ORDINAL_CODES)
+
+if (length(invalid_censored_codes) > 0) {
+  stop(
+    "The censored file contains values outside 1-5: ",
+    paste(invalid_censored_codes, collapse = ", ")
+  )
+}
+
+# Confirm that both files contain the same raters and observations.
+if (!identical(rater_names, censored_rater_names)) {
+  stop("The rater names or rater order differ between the two files.")
+}
+
+if (!identical(dim(ratings_matrix), dim(censored_matrix))) {
+  stop("The two datasets do not have the same dimensions.")
+}
+
+if (nrow(ratings_matrix) < 2) {
+  stop("At least two raters are required.")
+}
+
+if (!identical(dim(ratings_matrix), c(2L, 237L))) {
+  stop("The finalized rater matrix must have 2 raters and 237 observations.")
+}
+
+if (sum(apply(ratings_units_by_raters, 1, function(x) {
+  any(x %in% SPECIAL_CODES)
+})) != 26L) {
+  stop("Expected 26 observations containing a previously nominal score.")
+}
+
+if (sum(stats::complete.cases(censored_units_by_raters)) != 211L) {
+  stop("The censored analysis must contain 211 eligible observations.")
+}
+
+cat("Setup completed successfully.\n")
+cat("Number of raters:", nrow(ratings_matrix), "\n")
+cat("Number of rated observations:", ncol(ratings_matrix), "\n")
+cat(
+  "Observed main-file codes:",
+  paste(observed_codes, collapse = ", "),
+  "\n"
+)
+```
+
+
+
+# Crude Agreement
+```{r}
+# Calculates crude agreement as:
+# (number of agreeing observations) / (number of observations)
+
+# Helper Function
+crude_agreement <- function(agreement_vector){
+
+  n_total <- length(agreement_vector)
+  n_agree <- sum(agreement_vector)
+
+  data.frame(
+    Agreements = n_agree,
+    Total = n_total,
+    Crude_Agreement = n_agree / n_total
+  )
+
+}
+
+
+# Total Agreement
+# Agreement only when both raters assigned exactly the same code.
+r1 <- ratings_matrix[1, ]
+r2 <- ratings_matrix[2, ]
+
+agree_total <- r1 == r2
+
+total_results <- crude_agreement(agree_total)
+
+
+# Range Agreement
+# Scores within one ordinal category are considered agreement.
+#
+# Exception:
+#   5 does NOT agree with 6
+#   6 does NOT agree with 7
+
+agree_range <- logical(length(r1))
+for(i in seq_along(r1)){
+  a <- r1[i]
+  b <- r2[i]
+  if(a == b){
+    agree_range[i] <- TRUE
+  } else if(
+      abs(a-b) == 1 &&
+      !((a==5 & b==6) |
+        (a==6 & b==5) |
+        (a==6 & b==7) |
+        (a==7 & b==6))
+  ){
+    agree_range[i] <- TRUE
+  } else{
+    agree_range[i] <- FALSE
+  }
+}
+
+range_results <- crude_agreement(agree_range)
+
+
+# Censored Agreement
+# Remove observations where either rater recorded
+# Missing (6) or Non-Applicable (7).
+
+keep <- !(r1 %in% SPECIAL_CODES | r2 %in% SPECIAL_CODES)
+r1_censored <- r1[keep]
+r2_censored <- r2[keep]
+agree_censored <- r1_censored == r2_censored
+censored_results <- crude_agreement(agree_censored)
+
+
+# Buckets Agreement
+# Collapse categories:
+#
+# 1 & 2 -> 1
+# 3     -> 2
+# 4 & 5 -> 3
+# 6     -> 4
+# 7     -> 5
+
+bucket_scores <- function(x){
+  case_when(
+    x %in% c(1,2) ~ 1,
+    x == 3 ~ 2,
+    x %in% c(4,5) ~ 3,
+    x == 6 ~ 4,
+    x == 7 ~ 5
+  )
+
+}
+
+bucket1 <- bucket_scores(r1)
+bucket2 <- bucket_scores(r2)
+agree_bucket <- bucket1 == bucket2
+bucket_results <- crude_agreement(agree_bucket)
+
+
+# Summary Table
+agreement_summary <-
+  bind_rows(
+    Total = total_results,
+    Range = range_results,
+    Censored = censored_results,
+    Buckets = bucket_results,
+    .id = "Definition"
+  )
+
+# Regression check against the independently verified Step 1 results.
+expected_agreement <- tibble(
+  Definition = c("Total", "Range", "Censored", "Buckets"),
+  Agreements = c(115L, 165L, 110L, 152L),
+  Total = c(237L, 237L, 211L, 237L)
+)
+
+if (!identical(agreement_summary$Definition, expected_agreement$Definition) ||
+    !identical(as.integer(agreement_summary$Agreements),
+               expected_agreement$Agreements) ||
+    !identical(as.integer(agreement_summary$Total), expected_agreement$Total)) {
+  stop("Crude agreement results do not match the finalized Step 1 results.")
+}
+
+kable(
+  agreement_summary,
+  digits = 4,
+  caption = "Summary of crude agreement under each agreement definition.",
+  booktabs = TRUE
+)
+```
+
+
+
+# Krippendorff's Alpha
+# Disagreement Function
+```{r}
+# Builds a disagreement function for Krippendorff's alpha.
+#
+# ordinal_positions:
+#   Named numeric vector assigning each ordinal category a position.
+#
+# tolerance:
+#   Number of ordinal steps treated as complete agreement.
+#   Total/Censored/Buckets: tolerance = 0
+#   Range: tolerance = 1
+#
+# special_codes:
+#   Nominal categories that agree only with themselves.
+#   Here:
+#     6 = Missing
+#     7 = Non-Applicable
+
+make_disagreement_function <- function(
+    ordinal_positions,
+    tolerance = 0,
+    special_codes = SPECIAL_CODES
+) {
+
+  # Ensure category names are available for lookup.
+  if (is.null(names(ordinal_positions))) {
+    stop("ordinal_positions must be a named numeric vector.")
+  }
+
+  ordinal_codes <- as.numeric(names(ordinal_positions))
+
+  # Maximum effective ordinal distance after applying the tolerance.
+  #
+  # Total:
+  #   positions 1-5, tolerance 0
+  #   maximum effective distance = 4
+  #
+  # Range:
+  #   positions 1-5, tolerance 1
+  #   maximum effective distance = 3
+  #
+  # Buckets:
+  #   positions 1-3, tolerance 0
+  #   maximum effective distance = 2
+  maximum_effective_distance <-
+    max(ordinal_positions) -
+    min(ordinal_positions) -
+    tolerance
+
+  if (maximum_effective_distance <= 0) {
+    stop("The ordinal scale must contain more variation than the tolerance.")
+  }
+
+  function(x, y) {
+
+    # The package may pass genuine R missing values to the distance
+    # function. These are excluded from the disagreement calculation.
+    if (is.na(x) || is.na(y)) {
+      return(0)
+    }
+
+    # Exact matches always have zero disagreement.
+    #
+    # This includes:
+    #   6 versus 6
+    #   7 versus 7
+    if (x == y) {
+      return(0)
+    }
+
+    # Any non-identical comparison involving a nominal category
+    # receives maximum disagreement.
+    #
+    # Examples:
+    #   5 versus 6 = 1
+    #   6 versus 7 = 1
+    #   2 versus 7 = 1
+    if (x %in% special_codes || y %in% special_codes) {
+      return(1)
+    }
+
+    # Confirm that both remaining values are ordinal categories.
+    if (!(x %in% ordinal_codes && y %in% ordinal_codes)) {
+      stop(
+        paste(
+          "Unexpected category supplied to disagreement function:",
+          x, "and", y
+        )
+      )
+    }
+
+    # Look up the positions of the two ordinal categories.
+    position_x <- ordinal_positions[as.character(x)]
+    position_y <- ordinal_positions[as.character(y)]
+
+    raw_distance <- abs(position_x - position_y)
+
+    # Remove the number of steps permitted as complete agreement.
+    effective_distance <- max(raw_distance - tolerance, 0)
+
+    # Squared and standardized ordinal disagreement.
+    #
+    # The most distant ordinal categories receive disagreement = 1.
+    (effective_distance / maximum_effective_distance)^2
+  }
+}
+```
+
+
+# Four Definitions of Agreement
+```{r}
+# Total agreement:
+# Scores 1-5 retain their original ordinal positions.
+#
+# Examples:
+#   1 versus 1 = 0
+#   1 versus 2 = 1/16
+#   1 versus 3 = 4/16
+#   1 versus 5 = 1
+
+total_disagreement <- make_disagreement_function(
+  ordinal_positions = c(
+    "1" = 1,
+    "2" = 2,
+    "3" = 3,
+    "4" = 4,
+    "5" = 5
+  ),
+  tolerance = 0
+)
+
+
+# Range agreement:
+# A difference of one ordinal step is treated as complete agreement.
+#
+# The tolerance applies only to real scores 1-5. Because codes 6 and 7
+# are handled as special nominal categories before this calculation:
+#
+#   4 versus 5 = 0
+#   5 versus 6 = 1
+#   6 versus 7 = 1
+#
+# The remaining ordinal disagreement is rescaled so that
+# 1 versus 5 remains the maximum disagreement of 1.
+
+range_disagreement <- make_disagreement_function(
+  ordinal_positions = c(
+    "1" = 1,
+    "2" = 2,
+    "3" = 3,
+    "4" = 4,
+    "5" = 5
+  ),
+  tolerance = 1
+)
+
+
+# Censored agreement:
+# Uses the same ordinal disagreement function as Total.
+censored_disagreement <- total_disagreement
+
+
+# Bucketed agreement:
+#
+# Original scores are first transformed into:
+#   1 and 2 -> Low bucket    (code 1)
+#   3       -> Middle bucket (code 2)
+#   4 and 5 -> High bucket   (code 3)
+#   6       -> Missing       (code 6)
+#   7       -> Non-Applicable(code 7)
+#
+# The three numerical buckets are treated as ordinal positions:
+#   Low versus High    = 1.00 disagreement
+#   Low versus Middle  = 0.25 disagreement
+#   Middle versus High = 0.25 disagreement
+
+bucket_disagreement <- make_disagreement_function(
+  ordinal_positions = c(
+    "1" = 1,
+    "2" = 2,
+    "3" = 3
+  ),
+  tolerance = 0
+)
+```
+
+# Dataset Transformation & Validation
+```{r}
+# Total and Range use the original complete seven-code dataset.
+
+alpha_data_total <- ratings_units_by_raters
+alpha_data_range <- ratings_units_by_raters
+
+
+# Censored removes an entire observation when either rater assigned
+# Missing (6) or Non-Applicable (7).
+
+alpha_data_censored <- ratings_units_by_raters[
+  apply(
+    ratings_units_by_raters,
+    MARGIN = 1,
+    FUN = function(observation) {
+      !any(observation %in% SPECIAL_CODES)
+    }
+  ),
+  ,
+  drop = FALSE
+]
+
+
+# Recode the original categories for the bucketed analysis.
+
+recode_to_bucket <- function(x) {
+  case_when(
+    x %in% c(1, 2) ~ 1,
+    x == 3          ~ 2,
+    x %in% c(4, 5) ~ 3,
+    x == 6          ~ 6,
+    x == 7          ~ 7,
+    is.na(x)        ~ NA_real_,
+    TRUE            ~ NA_real_
+  )
+}
+
+alpha_data_bucket <- matrix(
+  recode_to_bucket(as.vector(ratings_units_by_raters)),
+  nrow = nrow(ratings_units_by_raters),
+  ncol = ncol(ratings_units_by_raters),
+  dimnames = dimnames(ratings_units_by_raters)
+)
+
+validate_alpha_data <- function(
+    data,
+    valid_codes,
+    analysis_name,
+    allow_na = FALSE
+) {
+
+  observed_codes <- sort(unique(as.vector(data)))
+  observed_nonmissing <- observed_codes[!is.na(observed_codes)]
+
+  invalid_codes <- setdiff(observed_nonmissing, valid_codes)
+
+  if (length(invalid_codes) > 0) {
+    stop(
+      analysis_name,
+      " contains invalid codes: ",
+      paste(invalid_codes, collapse = ", ")
+    )
+  }
+
+  if (!allow_na && anyNA(data)) {
+    stop(analysis_name, " contains unexpected genuine NA values.")
+  }
+
+  if (ncol(data) < 2) {
+    stop(analysis_name, " requires at least two raters.")
+  }
+
+  if (nrow(data) == 0) {
+    stop(analysis_name, " contains no eligible observations.")
+  }
+
+  invisible(TRUE)
+}
+
+
+validate_alpha_data(
+  alpha_data_total,
+  valid_codes = 1:7,
+  analysis_name = "Total dataset"
+)
+
+validate_alpha_data(
+  alpha_data_range,
+  valid_codes = 1:7,
+  analysis_name = "Range dataset"
+)
+
+validate_alpha_data(
+  alpha_data_censored,
+  valid_codes = 1:5,
+  analysis_name = "Censored dataset"
+)
+
+validate_alpha_data(
+  alpha_data_bucket,
+  valid_codes = c(1:3, 6:7),
+  analysis_name = "Bucket dataset"
+)
+```
+
+
+# Wrapper
+```{r}
+calculate_alpha <- function(
+    data,
+    disagreement_function,
+    analysis_name,
+    confint = TRUE
+) {
+
+  fit <- krippendorffs.alpha(
+    data = data,
+    level = disagreement_function,
+    method = "analytical",
+    confint = confint,
+    verbose = FALSE,
+    control = list(parallel = FALSE)
+  )
+
+  list(
+    name = analysis_name,
+    observations = nrow(data),
+    raters = ncol(data),
+    fit = fit
+  )
+}
+```
+
+
+# Calls to Calculate Krippendorff's Alpha
+```{r}
+alpha_total <- calculate_alpha(
+  data = alpha_data_total,
+  disagreement_function = total_disagreement,
+  analysis_name = "Total"
+)
+
+alpha_range <- calculate_alpha(
+  alpha_data_range,
+  range_disagreement,
+  "Range"
+)
+
+alpha_censored <- calculate_alpha(
+  alpha_data_censored,
+  censored_disagreement,
+  "Censored"
+)
+
+alpha_bucket <- calculate_alpha(
+  alpha_data_bucket,
+  bucket_disagreement,
+  "Buckets"
+)
+
+alpha_summary <- data.frame(
+  Definition = c("Total", "Range", "Censored", "Bucketed"),
+  Observations = c(
+    alpha_total$observations,
+    alpha_range$observations,
+    alpha_censored$observations,
+    alpha_bucket$observations
+  ),
+  Alpha = c(
+    alpha_total$fit$alpha.hat,
+    alpha_range$fit$alpha.hat,
+    alpha_censored$fit$alpha.hat,
+    alpha_bucket$fit$alpha.hat
+  ),
+  Lower_95_CI = c(
+    alpha_total$fit$L,
+    alpha_range$fit$L,
+    alpha_censored$fit$L,
+    alpha_bucket$fit$L
+  ),
+  Upper_95_CI = c(
+    alpha_total$fit$U,
+    alpha_range$fit$U,
+    alpha_censored$fit$U,
+    alpha_bucket$fit$U
+  )
+)
+
+kable(
+  alpha_summary,
+  digits = 4,
+  caption = "Summary of Krippendorff's alpha under each agreement definition."
+)
+```
+
+# Secondary Analyses
+
+## Crude Agreement by Domain
+
+```{r}
+# Apply the same four crude-agreement definitions within each domain.
+domain_agreement_one_definition <- function(data, definition) {
+  if (definition == "Censored") {
+    data <- data |>
+      filter(
+        !observer_1 %in% SPECIAL_CODES,
+        !observer_2 %in% SPECIAL_CODES
+      )
+  }
+
+  data |>
+    group_by(domain_number, domain) |>
+    summarise(
+      Agreements = case_when(
+        definition == "Total" ~ sum(observer_1 == observer_2),
+        definition == "Range" ~ sum(
+          if_else(
+            observer_1 %in% ORDINAL_CODES & observer_2 %in% ORDINAL_CODES,
+            abs(observer_1 - observer_2) <= 1,
+            observer_1 == observer_2
+          )
+        ),
+        definition == "Censored" ~ sum(observer_1 == observer_2),
+        definition == "Bucketed" ~ sum(
+          bucket_scores(observer_1) == bucket_scores(observer_2)
+        )
+      ),
+      Total = n(),
+      .groups = "drop"
+    ) |>
+    mutate(
+      Definition = definition,
+      Crude_Agreement = Agreements / Total,
+      .after = domain
+    )
+}
+
+domain_agreement_summary <- map_dfr(
+  c("Total", "Range", "Censored", "Bucketed"),
+  ~ domain_agreement_one_definition(ratings_tidy, .x)
+) |>
+  arrange(domain_number, factor(
+    Definition,
+    levels = c("Total", "Range", "Censored", "Bucketed")
+  )) |>
+  select(
+    domain_number,
+    domain,
+    Definition,
+    Agreements,
+    Total,
+    Crude_Agreement
+  )
+
+if (nrow(domain_agreement_summary) != 40L) {
+  stop("Expected 40 domain-level crude-agreement results.")
+}
+
+expected_domain_agreement <- read.csv(
+  repo_path("outputs", "preflight", "domain_results_preflight.csv"),
+  stringsAsFactors = FALSE
+) |>
+  transmute(
+    domain_number,
+    domain,
+    Definition = definition,
+    Agreements = agreements,
+    Total = observations,
+    Crude_Agreement = crude_agreement_percent / 100
+  ) |>
+  arrange(domain_number, factor(
+    Definition,
+    levels = c("Total", "Range", "Censored", "Bucketed")
+  ))
+
+domain_comparison <- all.equal(
+  domain_agreement_summary,
+  expected_domain_agreement,
+  tolerance = 0.0000001,
+  check.attributes = FALSE
+)
+
+if (!isTRUE(domain_comparison)) {
+  stop(
+    "Domain-level agreement does not match the verified preflight table: ",
+    paste(domain_comparison, collapse = "; ")
+  )
+}
+
+kable(
+  domain_agreement_summary |>
+    select(-domain_number),
+  digits = 4,
+  caption = "Crude agreement by PRECIS-2 domain and agreement definition.",
+  longtable = TRUE,
+  booktabs = TRUE
+)
+```
+
+
+## Mean Signed Deviation from Consensus
+
+```{r}
+# Previously nominal codes (6 = Missing; 7 = Non-Applicable) are omitted.
+# A common pairwise-censored set is used: an observation is excluded for both
+# reviewers if either reviewer has code 6 or 7. The signed deviation is the
+# reviewer score minus the consensus score.
+ratings_with_consensus <- ratings_tidy |>
+  select(
+    observation_id, trial, domain_number, domain,
+    observer_1, observer_2
+  ) |>
+  left_join(
+    consensus_tidy |>
+      select(observation_id, consensus),
+    by = "observation_id"
+  )
+
+eligible_consensus_ratings <- ratings_with_consensus |>
+  filter(
+    observer_1 %in% ORDINAL_CODES,
+    observer_2 %in% ORDINAL_CODES,
+    consensus %in% ORDINAL_CODES
+  )
+
+reviewer_deviation_summary <- bind_rows(
+  eligible_consensus_ratings |>
+    transmute(
+      Reviewer = "Aarian",
+      reviewer_score = observer_1,
+      consensus
+    ),
+  eligible_consensus_ratings |>
+    transmute(
+      Reviewer = "Merrick",
+      reviewer_score = observer_2,
+      consensus
+    )
+) |>
+  mutate(deviation = reviewer_score - consensus) |>
+  group_by(Reviewer) |>
+  summarise(
+    Observations = n(),
+    Signed_Deviation_Sum = sum(deviation),
+    Absolute_Deviation_Sum = sum(abs(deviation)),
+    Mean_Signed_Deviation = mean(deviation),
+    Mean_Absolute_Deviation = mean(abs(deviation)),
+    .groups = "drop"
+  )
+
+expected_deviation_totals <- tibble(
+  Reviewer = c("Aarian", "Merrick"),
+  Observations = c(211L, 211L),
+  Signed_Deviation_Sum = c(-3, 6),
+  Absolute_Deviation_Sum = c(97, 92)
+)
+
+observed_deviation_totals <- reviewer_deviation_summary |>
+  select(
+    Reviewer,
+    Observations,
+    Signed_Deviation_Sum,
+    Absolute_Deviation_Sum
+  ) |>
+  arrange(Reviewer)
+
+expected_deviation_totals <- expected_deviation_totals |>
+  arrange(Reviewer)
+
+deviation_comparison <- all.equal(
+  observed_deviation_totals,
+  expected_deviation_totals,
+  check.attributes = FALSE
+)
+
+if (!isTRUE(deviation_comparison)) {
+  stop(
+    "Reviewer-deviation totals do not match the finalized Step 1 results: ",
+    paste(deviation_comparison, collapse = "; ")
+  )
+}
+
+kable(
+  reviewer_deviation_summary |>
+    transmute(
+      Reviewer,
+      `Eligible observations` = Observations,
+      `Mean signed deviation` = Mean_Signed_Deviation,
+      `Mean absolute deviation` = Mean_Absolute_Deviation
+    ),
+  digits = 6,
+  caption = "Reviewer deviation from consensus after excluding codes 6 and 7.",
+  booktabs = TRUE
+)
+```
+
+
+# Reproducibility Information
+
+```{r export-results, include=FALSE}
+results_directory <- repo_path("outputs", "results")
+dir.create(results_directory, recursive = TRUE, showWarnings = FALSE)
+
+write.csv(
+  agreement_summary,
+  file.path(results_directory, "global-crude-agreement.csv"),
+  row.names = FALSE
+)
+write.csv(
+  domain_agreement_summary,
+  file.path(results_directory, "domain-crude-agreement.csv"),
+  row.names = FALSE
+)
+write.csv(
+  reviewer_deviation_summary,
+  file.path(results_directory, "reviewer-deviation-from-consensus.csv"),
+  row.names = FALSE
+)
+write.csv(
+  alpha_summary,
+  file.path(results_directory, "krippendorff-alpha.csv"),
+  row.names = FALSE
+)
+
+writeLines(
+  capture.output(sessionInfo()),
+  file.path(results_directory, "session-info.txt")
+)
+```
+
+```{r}
+reproducibility_summary <- tibble(
+  Component = c(
+    "R",
+    "Platform",
+    "krippendorffsalpha",
+    "dplyr",
+    "rmarkdown",
+    "knitr"
+  ),
+  Version = c(
+    paste(R.version$major, R.version$minor, sep = "."),
+    R.version$platform,
+    as.character(packageVersion("krippendorffsalpha")),
+    as.character(packageVersion("dplyr")),
+    as.character(packageVersion("rmarkdown")),
+    as.character(packageVersion("knitr"))
+  )
+)
+
+kable(
+  reproducibility_summary,
+  caption = paste(
+    "Software environment. Full session information is written to",
+    "outputs/results/session-info.txt."
+  ),
+  booktabs = TRUE
+)
+```
