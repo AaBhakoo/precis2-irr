@@ -1,4 +1,12 @@
 file,variable,type,allowed_values,description
+precis2_irr_final.csv,observation_id,integer,1-237,"Unique position in the domain-major analysis dataset"
+precis2_irr_final.csv,trial_order,integer,1-24,"Trial order used within each domain"
+precis2_irr_final.csv,trial,text,24 trial labels,"Foreign key to included_trials.csv"
+precis2_irr_final.csv,domain_number,integer,1-10,"Modified PRECIS-2 domain number; Comparator is 10"
+precis2_irr_final.csv,domain,text,10 domain names,"Modified PRECIS-2 domain name"
+precis2_irr_final.csv,aarian_score,integer,1-7,"Aarian Bhakoo independent rating; 6 is Missing and 7 is Not Applicable"
+precis2_irr_final.csv,merrick_score,integer,1-7,"Merrick Zwarenstein independent rating; 6 is Missing and 7 is Not Applicable"
+precis2_irr_final.csv,consensus_score,integer,1-7,"Consensus rating; 6 is Missing and 7 is Not Applicable"
 independent_ratings_tidy.csv,observation_id,integer,1-237,"Unique position in the domain-major analysis dataset"
 independent_ratings_tidy.csv,trial_order,integer,1-24,"Trial order used within each domain"
 independent_ratings_tidy.csv,trial,text,24 trial citations,"Trial citation label"
@@ -21,4 +29,3 @@ verified_corrections.csv,source_observer_2,integer,1-7,"Observer 2 value in arch
 verified_corrections.csv,corrected_observer_1,integer,1-7,"Independently verified Observer 1 value used for analysis"
 verified_corrections.csv,corrected_observer_2,integer,1-7,"Independently verified Observer 2 value used for analysis"
 verified_corrections.csv,verification_basis,text,Not applicable,"Provenance of correction decision"
-
