@@ -8,3 +8,5 @@
 *.tex
 tmp/
 archive/
+__pycache__/
+*.py[cod]

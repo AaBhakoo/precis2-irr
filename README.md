@@ -70,7 +70,8 @@ the statistician-reviewed script. See
 | Location | Contents |
 |---|---|
 | `analysis/` | Reproducible R Markdown analysis |
-| `data/derived/` | Finalized analysis-ready ratings and consensus data |
+| `data/derived/precis2_irr_final.csv` | Canonical 237-row analysis dataset with both independent ratings and consensus |
+| `data/included_trials.csv` | Reference key for the 24 trial reports |
 | `data/data_dictionary.csv` | Variable definitions and permitted values |
 | `documentation/` | Analysis specification, decision log, checksums, and audit reports |
 | `outputs/preflight/` | Independently generated verification tables |
