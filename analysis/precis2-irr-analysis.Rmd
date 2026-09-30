@@ -75,28 +75,32 @@ project_root <- if (dir.exists(file.path("data", "derived"))) {
 
 repo_path <- function(...) file.path(project_root, ...)
 
-# Read the finalized, domain-major analysis tables from the repository.
-ratings_file <- repo_path(
-  "data", "derived", "independent_ratings_tidy.csv"
-)
-consensus_file <- repo_path(
-  "data", "derived", "consensus_ratings_tidy.csv"
+# Read the canonical finalized, domain-major analysis dataset. The column
+# aliases below preserve the statistician-reviewed analysis object names.
+final_data_file <- repo_path(
+  "data", "derived", "precis2_irr_final.csv"
 )
 
-ratings_tidy <- read.csv(
-  ratings_file,
-  check.names = FALSE,
-  stringsAsFactors = FALSE
-) |>
-  arrange(observation_id)
-
-consensus_tidy <- read.csv(
-  consensus_file,
+final_data <- read.csv(
+  final_data_file,
   check.names = FALSE,
   stringsAsFactors = FALSE,
   na.strings = c("", "NA")
 ) |>
   arrange(observation_id)
+
+ratings_tidy <- final_data |>
+  transmute(
+    observation_id, trial_order, trial, domain_number, domain,
+    observer_1 = aarian_score,
+    observer_2 = merrick_score
+  )
+
+consensus_tidy <- final_data |>
+  transmute(
+    observation_id, trial, domain_number, domain,
+    consensus = consensus_score
+  )
 
 rater_names <- c("Aarian", "Merrick")
 censored_rater_names <- rater_names
