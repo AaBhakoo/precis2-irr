@@ -1,25 +1,25 @@
-trial_order,trial,citation,doi,verification_status
-1,Barcelo (2010),"Barcelo A et al. Using collaborative learning to improve diabetes care and outcomes: The VIDA project. Primary Care Diabetes. 2010;4(3):145-153.",10.1016/j.pcd.2010.04.005,verified against Cochrane review and Crossref
-2,Brown (1999),"Brown JB et al. Effect of clinician communication skills training on patient satisfaction: a randomized controlled trial. Annals of Internal Medicine. 1999;131(11):822-829.",10.7326/0003-4819-131-11-199912070-00004,verified against Cochrane review and Crossref
-3,Campbell (2001),"Campbell JC et al. An evaluation of a system-change training model to improve emergency department response to battered women. Academic Emergency Medicine. 2001;8(2):131-138.",10.1111/j.1553-2712.2001.tb01277.x,verified against Cochrane review and Crossref
-4,Clay-Williams (2013),"Clay-Williams R et al. Classroom and simulation team training: a randomized controlled trial. International Journal for Quality in Health Care. 2013.",10.1093/intqhc/mzt027,matched by author year and title; co-author verification pending
-5,Fransen (2013),Fransen et al. (2013),,full source citation pending co-author verification
-6,Frengley (2011),"Frengley RW et al. The effect of a simulation-based training intervention on the performance of established critical care unit teams. Critical Care Medicine. 2011.",10.1097/CCM.0b013e3182282a98,matched by author year and trial description; co-author verification pending
-7,Fritz (2017),Fritz et al. (2017),,full source citation pending co-author verification
-8,Fukui (2019),Fukui et al. (2019),,full source citation pending co-author verification
-9,Helitzer (2011),"Helitzer DL et al. A randomized controlled trial of communication training with primary care providers to improve patient-centeredness and health risk communication. Patient Education and Counseling. 2011;82(1):21-29.",10.1016/j.pec.2010.01.021,verified against Cochrane review and Crossref
-10,Koerner (2014),Koerner et al. (2014),,full source citation pending co-author verification
-11,Languerrand (2020),Languerrand et al. (2020),,full source citation pending co-author verification
-12,Nielsen (2007),"Nielsen PE et al. Effects of teamwork training on adverse outcomes and process of care in labor and delivery: a randomized controlled trial. Obstetrics & Gynecology. 2007;109(1):48-55.",10.1097/01.AOG.0000250900.53126.C2,verified against Cochrane review and Crossref
-13,Pasay (2019),"Pasay DK et al. Antimicrobial stewardship in rural nursing homes: impact of interprofessional education and clinical decision tool implementation on urinary tract infection treatment in a cluster randomized trial. Infection Control & Hospital Epidemiology. 2019.",10.1017/ice.2019.9,matched by author year and title; co-author verification pending
-14,Pieper (2016),Pieper et al. (2016),,full source citation pending co-author verification
-15,Riley (2011),"Riley W et al. Didactic and simulation nontechnical skills team training to improve perinatal patient outcomes in a community hospital. Joint Commission Journal on Quality and Patient Safety. 2011.",10.1016/S1553-7250(11)37046-8,matched by author year and trial description; co-author verification pending
-16,Robling (2012),Robling et al. (2012),,full source citation pending co-author verification
-17,Romjin (2019),Romijn et al. (2019),,author spelling and full source citation pending co-author verification
-18,Sagahutu (2020),Sagahutu et al. (2020),,full source citation pending co-author verification
-19,Sorensen (2015),"Sørensen JL et al. Simulation-based multiprofessional obstetric anaesthesia training conducted in situ versus off-site leads to similar individual and team outcomes: a randomised educational trial. BMJ Open. 2015;5:e008344.",10.1136/bmjopen-2015-008344,matched by author year and title; co-author verification pending
-20,Strasser (2008),"Strasser DC et al. Team training and stroke rehabilitation outcomes: a cluster randomized trial. Archives of Physical Medicine and Rehabilitation. 2008;89(1):10-15.",,verified against Cochrane review; DOI pending
-21,Strauven (2019),Strauven et al. (2019),,full source citation pending co-author verification
-22,Thompson (2000A),"Thompson C et al. Effects of a clinical-practice guideline and practice-based education on detection and outcome of depression in primary care: Hampshire Depression Project randomised controlled trial. Lancet. 2000;355(9199):185-191.",10.1016/S0140-6736(99)03171-2,verified against Cochrane review and Crossref
-23,Thompson (2000B),"Thompson RS et al. Identification and management of domestic violence: a randomized trial. American Journal of Preventive Medicine. 2000;19(4):253-263.",10.1016/S0749-3797(00)00231-2,verified against Cochrane review and Crossref
-24,Zattoni (2017),"Zattoni F et al. Development of a surgical safety training program and checklist for conversion during robotic partial nephrectomies. Urology. 2017.",10.1016/j.urology.2017.06.057,matched by author year and title; co-author verification pending
+trial_order,trial,citation,doi
+1,Barcelo (2010),Barcelo A et al. Using collaborative learning to improve diabetes care and outcomes: The VIDA project. Primary Care Diabetes. 2010;4(3):145-153.,10.1016/j.pcd.2010.04.005
+2,Brown (1999),Brown JB et al. Effect of clinician communication skills training on patient satisfaction: a randomized controlled trial. Annals of Internal Medicine. 1999;131(11):822-829.,10.7326/0003-4819-131-11-199912070-00004
+3,Campbell (2001),Campbell JC et al. An evaluation of a system-change training model to improve emergency department response to battered women. Academic Emergency Medicine. 2001;8(2):131-138.,10.1111/j.1553-2712.2001.tb01277.x
+4,Clay-Williams (2013),Clay-Williams R et al. Classroom and simulation team training: a randomized controlled trial. International Journal for Quality in Health Care. 2013.,10.1093/intqhc/mzt027
+5,Fransen (2013),Fransen et al. (2013),10.1111/j.1471-0528.2012.03436.x
+6,Frengley (2011),Frengley RW et al. The effect of a simulation-based training intervention on the performance of established critical care unit teams. Critical Care Medicine. 2011.,10.1097/CCM.0b013e3182282a98
+7,Fritz (2017),Fritz et al. (2017),10.1371/journal.pone.0172623
+8,Fukui (2019),Fukui et al. (2019),10.1371/journal.pone.0219589
+9,Helitzer (2011),Helitzer DL et al. A randomized controlled trial of communication training with primary care providers to improve patient-centeredness and health risk communication. Patient Education and Counseling. 2011;82(1):21-29.,10.1016/j.pec.2010.01.021
+10,Koerner (2014),Koerner et al. (2014),10.1177/0269215513494874
+11,Languerrand (2020),Languerrand et al. (2020),10.1136/bmjqs-2018-008625
+12,Nielsen (2007),Nielsen PE et al. Effects of teamwork training on adverse outcomes and process of care in labor and delivery: a randomized controlled trial. Obstetrics & Gynecology. 2007;109(1):48-55.,10.1097/01.AOG.0000250900.53126.C2
+13,Pasay (2019),Pasay DK et al. Antimicrobial stewardship in rural nursing homes: impact of interprofessional education and clinical decision tool implementation on urinary tract infection treatment in a cluster randomized trial. Infection Control & Hospital Epidemiology. 2019.,10.1017/ice.2019.9
+14,Pieper (2016),Pieper et al. (2016),10.1111/jgs.13868
+15,Riley (2011),Riley W et al. Didactic and simulation nontechnical skills team training to improve perinatal patient outcomes in a community hospital. Joint Commission Journal on Quality and Patient Safety. 2011.,10.1016/S1553-7250(11)37046-8
+16,Robling (2012),Robling et al. (2012),10.1136/bmj.e2359
+17,Romjin (2019),Romijn et al. (2019),10.1111/1471-0528.15611
+18,Sagahutu (2020),Sagahutu et al. (2020),10.1371/journal.pone.0226247
+19,Sorensen (2015),Sørensen JL et al. Simulation-based multiprofessional obstetric anaesthesia training conducted in situ versus off-site leads to similar individual and team outcomes: a randomised educational trial. BMJ Open. 2015;5:e008344.,10.1136/bmjopen-2015-008344
+20,Strasser (2008),Strasser DC et al. Team training and stroke rehabilitation outcomes: a cluster randomized trial. Archives of Physical Medicine and Rehabilitation. 2008;89(1):10-15.,
+21,Strauven (2019),Strauven et al. (2019),10.1016/j.jamda.2019.06.006
+22,Thompson (2000A),Thompson C et al. Effects of a clinical-practice guideline and practice-based education on detection and outcome of depression in primary care: Hampshire Depression Project randomised controlled trial. Lancet. 2000;355(9199):185-191.,10.1016/S0140-6736(99)03171-2
+23,Thompson (2000B),Thompson RS et al. Identification and management of domestic violence: a randomized trial. American Journal of Preventive Medicine. 2000;19(4):253-263.,10.1016/S0749-3797(00)00231-2
+24,Zattoni (2017),Zattoni F et al. Development of a surgical safety training program and checklist for conversion during robotic partial nephrectomies. Urology. 2017.,10.1016/j.urology.2017.06.057
