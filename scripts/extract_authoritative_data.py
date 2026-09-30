@@ -18,6 +18,7 @@ from openpyxl import load_workbook
 
 ROOT = Path(__file__).resolve().parents[1]
 SOURCE = ROOT / "archive" / "PRECIS-2 Re-Analysis - Spreadsheet (1).xlsx"
+REFERENCE_KEY = ROOT / "data" / "included_trials.csv"
 DATA_DIR = ROOT / "data" / "derived"
 OUTPUT_DIR = ROOT / "outputs" / "preflight"
 
@@ -173,6 +174,12 @@ def main():
 
     assert len(reviewer_1) == len(reviewer_2) == len(consensus) == 237
 
+    with REFERENCE_KEY.open(newline="", encoding="utf-8") as handle:
+        reference_rows = list(csv.DictReader(handle))
+    assert len(reference_rows) == 24, "Reference key must contain 24 trial reports"
+    assert [row["trial"] for row in reference_rows] == TRIALS, "Reference key is not aligned to trial order"
+    assert [int(row["trial_order"]) for row in reference_rows] == list(range(1, 25))
+
     included_map = [row for row in observation_map() if row["included"]]
     assert len(included_map) == 237
     assert len({(row["trial"], row["domain_number"]) for row in included_map}) == 237
@@ -212,6 +219,7 @@ def main():
     correction_rows = []
     tidy = []
     consensus_tidy = []
+    final_tidy = []
     for meta, source_a, source_b, c in zip(included_map, reviewer_1, reviewer_2, consensus):
         verified = VERIFIED_CORRECTIONS.get((meta["trial"], meta["domain_number"]))
         final_a, final_b = verified if verified else (int(source_a), int(source_b))
@@ -243,10 +251,21 @@ def main():
             "domain": meta["domain"],
             "consensus": int(c),
         })
+        final_tidy.append({
+            "observation_id": meta["observation_id"],
+            "trial_order": meta["trial_order"],
+            "trial": meta["trial"],
+            "domain_number": meta["domain_number"],
+            "domain": meta["domain"],
+            "aarian_score": final_a,
+            "merrick_score": final_b,
+            "consensus_score": int(c),
+        })
 
     exclusions = [{k: v for k, v in row.items() if k != "included"} for row in observation_map() if not row["included"]]
     write_csv(DATA_DIR / "independent_ratings_tidy.csv", list(tidy[0]), tidy)
     write_csv(DATA_DIR / "consensus_ratings_tidy.csv", list(consensus_tidy[0]), consensus_tidy)
+    write_csv(DATA_DIR / "precis2_irr_final.csv", list(final_tidy[0]), final_tidy)
     write_csv(DATA_DIR / "exclusions.csv", list(exclusions[0]), exclusions)
     write_csv(DATA_DIR / "verified_corrections.csv", list(correction_rows[0]), correction_rows)
 
@@ -296,6 +315,13 @@ def main():
     special = sum(r["observer_1"] in (6, 7) or r["observer_2"] in (6, 7) for r in tidy)
     assert special == 26
     assert len([r for r in tidy if r["observer_1"] in range(1, 6) and r["observer_2"] in range(1, 6)]) == 211
+    assert len(final_tidy) == 237
+    assert [r["observation_id"] for r in final_tidy] == list(range(1, 238))
+    assert len({(r["trial"], r["domain_number"]) for r in final_tidy}) == 237
+    assert all(r["aarian_score"] in range(1, 8) and
+               r["merrick_score"] in range(1, 8) and
+               r["consensus_score"] in range(1, 8)
+               for r in final_tidy)
 
     expected_crude = {
         "Total": (115, 237),
