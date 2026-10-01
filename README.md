@@ -63,16 +63,7 @@ The finalized dataset uses domain-major ordering. Thompson (2000B) Domains
 7-9 are excluded. Three corrections independently verified against the
 original records are incorporated in the canonical dataset: Sagahutu Domain 4
 (5/2), Strasser Domain 4 (4/5), and Thompson (2000A) Domain 4 (4/3), shown as
-Aarian/Merrick. Original workbooks, extraction notes, manuscript drafts, and
-development-only verification files are retained privately rather than shared
-in this analysis repository.
-
-## Data availability and citation
-
-After co-author approval, create a versioned release and archive it in a
-research-data repository that issues a DOI, such as Zenodo. Cite and link that
-archived release in the manuscript and submission system; GitHub remains the
-version-controlled working repository.
+Aarian/Merrick.
 
 ## Contact
 
