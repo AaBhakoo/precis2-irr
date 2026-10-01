@@ -68,12 +68,12 @@ MAX_DISAGREEMENT <- 1
 ```{r loading-files}
 # Locate the repository whether the report is rendered from the project root
 # or directly from the analysis directory in RStudio.
-project_root <- if (dir.exists(file.path("data", "derived"))) {
+project_root <- if (file.exists(file.path("data", "precis2_irr_final.csv"))) {
   normalizePath(".", mustWork = TRUE)
-} else if (dir.exists(file.path("..", "data", "derived"))) {
+} else if (file.exists(file.path("..", "data", "precis2_irr_final.csv"))) {
   normalizePath("..", mustWork = TRUE)
 } else {
-  stop("Could not locate the repository's data/derived directory.")
+  stop("Could not locate data/precis2_irr_final.csv.")
 }
 
 repo_path <- function(...) file.path(project_root, ...)
@@ -81,7 +81,7 @@ repo_path <- function(...) file.path(project_root, ...)
 # Read the final dataset ("precis2_irr_final.csv")
 # The column aliases below preserve the statistician-reviewed analysis object names.
 final_data_file <- repo_path(
-  "data", "derived", "precis2_irr_final.csv"
+  "data", "precis2_irr_final.csv"
 )
 
 final_data <- read.csv(
@@ -852,19 +852,39 @@ if (nrow(domain_agreement_summary) != 40L) {
   stop("Expected 40 domain-level crude-agreement results.")
 }
 
-# compare to preflight results
-expected_domain_agreement <- read.csv(
-  repo_path("outputs", "preflight", "domain_results_preflight.csv"),
-  stringsAsFactors = FALSE
+# Regression check against the independently verified Step 1 results.
+# The accepted counts are embedded here so reproduction does not depend on
+# development-only preflight files.
+expected_domain_agreement <- tibble(
+  domain_number = rep(1:10, each = 4),
+  domain = rep(
+    c(
+      "Eligibility", "Recruitment", "Setting", "Organization",
+      "Flexibility in Delivery", "Flexibility in Adherence", "Follow-up",
+      "Primary Outcome", "Primary Analysis", "Comparator"
+    ),
+    each = 4
+  ),
+  Definition = rep(
+    c("Total", "Range", "Censored", "Bucketed"),
+    times = 10
+  ),
+  Agreements = c(
+    13L, 17L, 12L, 15L, 13L, 18L, 10L, 17L,
+    13L, 19L, 13L, 17L, 10L, 17L, 10L, 16L,
+    16L, 20L, 16L, 20L, 10L, 11L, 10L, 11L,
+    12L, 17L, 12L, 14L, 10L, 15L, 10L, 13L,
+    7L, 10L, 6L, 8L, 11L, 21L, 11L, 21L
+  ),
+  Total = c(
+    24L, 24L, 22L, 24L, 24L, 24L, 17L, 24L,
+    24L, 24L, 24L, 24L, 24L, 24L, 24L, 24L,
+    24L, 24L, 24L, 24L, 24L, 24L, 15L, 24L,
+    23L, 23L, 22L, 23L, 23L, 23L, 23L, 23L,
+    23L, 23L, 16L, 23L, 24L, 24L, 24L, 24L
+  )
 ) |>
-  transmute(
-    domain_number,
-    domain,
-    Definition = definition,
-    Agreements = agreements,
-    Total = observations,
-    Crude_Agreement = crude_agreement_percent / 100
-  ) |>
+  mutate(Crude_Agreement = Agreements / Total) |>
   arrange(domain_number, factor(
     Definition,
     levels = c("Total", "Range", "Censored", "Bucketed")

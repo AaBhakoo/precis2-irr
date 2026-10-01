@@ -42,7 +42,7 @@ if (length(missing_packages) > 0L) {
 project_root <- normalizePath(".", mustWork = TRUE)
 
 if (!dir.exists(file.path(project_root, "analysis")) ||
-    !dir.exists(file.path(project_root, "data", "derived"))) {
+    !file.exists(file.path(project_root, "data", "precis2_irr_final.csv"))) {
   stop("Run this script from the precis2-irr repository root.")
 }
 

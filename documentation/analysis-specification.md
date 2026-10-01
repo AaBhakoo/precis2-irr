@@ -29,8 +29,8 @@ Crude agreement and Krippendorff's alpha are calculated under four definitions.
 4. Bucketed: scores are grouped as 1-2, 3, and 4-5. The numerical buckets are
    ordinal; codes 6 and 7 remain distinct nominal categories.
 
-The statistician-reviewed implementation is the archived `IRR Analysis.Rmd`.
-It uses analytical confidence intervals in the `krippendorffsalpha` package.
+The implementation preserves the statistician-reviewed alpha approach and
+uses analytical confidence intervals in the `krippendorffsalpha` package.
 
 ## Secondary analyses
 
@@ -50,4 +50,7 @@ All reported analyses were prespecified.
 
 The 2x237 tables are confirmed to use domain-major ordering: all included
 trials for Domain 1, followed by all included trials for Domain 2, and so forth.
-Verified corrections are recorded separately and applied only to derived data.
+Three independently verified corrections are incorporated in the canonical
+dataset: Sagahutu Domain 4 (5/2), Strasser Domain 4 (4/5), and Thompson
+(2000A) Domain 4 (4/3), shown as Aarian/Merrick. The source workbooks are
+retained privately and are not part of this reproducibility repository.
