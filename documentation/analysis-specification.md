@@ -46,11 +46,9 @@ All reported analyses were prespecified.
 - Independent ratings: Table 1 in `Krippendorf Rater Tables`.
 - Censored cross-check: Table 2 in `Krippendorf Rater Tables`.
 - Consensus: `Consensus_Scores`.
-- Agreement sheets and green columns: supporting checks, not final authority.
 
 The 2x237 tables are confirmed to use domain-major ordering: all included
 trials for Domain 1, followed by all included trials for Domain 2, and so forth.
 Three independently verified corrections are incorporated in the canonical
 dataset: Sagahutu Domain 4 (5/2), Strasser Domain 4 (4/5), and Thompson
-(2000A) Domain 4 (4/3), shown as Aarian/Merrick. The source workbooks are
-retained privately and are not part of this reproducibility repository.
+(2000A) Domain 4 (4/3), shown as Aarian/Merrick.
