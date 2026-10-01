@@ -5,7 +5,7 @@
 - Twenty-four randomized controlled trials.
 - Two independent reviewers: Observer 1 is Aarian Bhakoo and Observer 2 is
   Merrick Zwarenstein.
-- Ten PRECIS-2.5 domains per trial, with Comparator treated as Domain 10.
+- Ten PRECIS-2 domains per trial, with Comparator treated as Domain 10.
 - Thompson (2000B) Domains 7, 8, and 9 were excluded because separate patient-
   and staff-level individual measurements could not be defensibly prioritized
   or weighted.
